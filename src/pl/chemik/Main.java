@@ -3,6 +3,7 @@ package pl.chemik;
 public class Main {
 
     public static void main(String[] args) {
-	// write your code here
+        Compressor compressor = new Compressor();
+        compressor.readInputFile("norm_wiki_sample.txt");
     }
 }
