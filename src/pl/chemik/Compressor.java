@@ -15,7 +15,6 @@ public class Compressor {
         readInputFile(filename);
         checkProbabilities();
         create();
-        encode();
     }
 
     private void displayText(List<String> wordsArray, int maxNumbers) {
@@ -66,8 +65,18 @@ public class Compressor {
         for (Tuple tuple : tuples) {
             BitSet code = new BitSet(6);
             int counter = 0;
-            for (String bit : Integer.toBinaryString(tuple.getOrder()).split("")) {
-                int bitValue = Integer.parseInt(bit);
+            String[] stringBits = Integer.toBinaryString(tuple.getOrder()).split("");
+            List<String> bits = new ArrayList<>();
+            int firstValue = 6 - stringBits.length;
+            for (int i = 0; i < 6; i++) {
+                if (i<firstValue) {
+                    bits.add("0");
+                }else {
+                    bits.add(stringBits[i-firstValue]);
+                }
+            }
+            for (int i = 0; i < 6; i++) {
+                int bitValue = Integer.parseInt(bits.get(i));
                 if (bitValue == 1) {
                     code.set(counter);
                 }
@@ -101,8 +110,9 @@ public class Compressor {
 
     /**
      * Tworzy zakodowaną reprezentację tekstu
+     * @return
      */
-    public void encode() {
+    public BitSet encode() {
         BitSet bitSet = new BitSet(6 * fileLetters.size());
         int globalBitNumber = 0;
         for (String letter : fileLetters) {
@@ -114,6 +124,7 @@ public class Compressor {
             }
             globalBitNumber += 6;
         }
+        return bitSet;
     }
 
     /**
