@@ -129,9 +129,28 @@ public class Compressor {
 
     /**
      * Odkodowuje zakodowany tekst
+     * @return
      */
-    public void decode() {
+    public String decode(BitSet textToDecode) {
+        StringBuilder decompressedText = new StringBuilder("");
+        HashMap<BitSet, String> decodingCode = new HashMap<>();
+        lettersCode.forEach((letter, code) -> decodingCode.put(code, letter));
 
+        BitSet tmp = new BitSet(6);
+        int count = 0;
+        for (int i = 0; i < textToDecode.length(); i++) {
+            if (textToDecode.get(i)) {
+                tmp.set(count);
+            }
+            count++;
+            if (count == 6) {
+                String foundLetter = decodingCode.get(tmp);
+                decompressedText.append(foundLetter);
+                count = 0;
+                tmp = new BitSet(6);
+            }
+        }
+        return decompressedText.toString();
     }
 
     /**
