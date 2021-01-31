@@ -272,4 +272,22 @@ public class SixBitCompressor {
 
         return new LoadingResult(bitSet, code);
     }
+
+    public void checkEfficiency() {
+        double h = 0;
+        for (float probability : probabilities.values()) {
+            double log2n = Math.log10(probability) / Math.log10(2.0);
+            h += probability * log2n;
+        }
+        h = h * -1;
+        float l = 0;
+        int CODE_LENGTH = 6;
+        for (float probability : probabilities.values()) {
+            l += probability * CODE_LENGTH;
+        }
+        System.out.println("Entropy: " + h);
+        System.out.println("Length: " + l);
+        System.out.println("Efficiency: " + h / l);
+        System.out.println("Efficiency percent: " + (int)(h / l * 100) + "%");
+    }
 }

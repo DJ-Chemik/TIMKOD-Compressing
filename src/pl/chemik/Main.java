@@ -22,6 +22,7 @@ public class Main {
         //        System.out.println(decompressedText);
         //        System.out.println(decodedTextFromFile);
         checkIs2TextIdentical(decompressedText, decodedTextFromFile);
+        sixBitCompressor.checkEfficiency();
     }
 
     private static void useHuffmanCompressor() {
