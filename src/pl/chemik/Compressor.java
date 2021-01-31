@@ -1,7 +1,9 @@
 package pl.chemik;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class Compressor {
@@ -67,10 +69,10 @@ public class Compressor {
             List<String> bits = new ArrayList<>();
             int firstValue = 6 - stringBits.length;
             for (int i = 0; i < 6; i++) {
-                if (i<firstValue) {
+                if (i < firstValue) {
                     bits.add("0");
-                }else {
-                    bits.add(stringBits[i-firstValue]);
+                } else {
+                    bits.add(stringBits[i - firstValue]);
                 }
             }
             for (int i = 0; i < 6; i++) {
@@ -87,6 +89,7 @@ public class Compressor {
 
     /**
      * Na podstawie listy częstości poszczególnych znaków tworzy kod
+     *
      * @return
      */
     public Map<String, BitSet> create() {
@@ -111,6 +114,7 @@ public class Compressor {
 
     /**
      * Tworzy zakodowaną reprezentację tekstu
+     *
      * @return
      */
     public BitSet encode(Map<String, BitSet> lettersCode) {
@@ -119,7 +123,7 @@ public class Compressor {
         for (String letter : fileLetters) {
             BitSet letterCode = lettersCode.get(letter);
             for (int i = 0; i < 6; i++) {
-                if(letterCode.get(i)) {
+                if (letterCode.get(i)) {
                     bitSet.set(globalBitNumber + i);
                 }
             }
@@ -130,6 +134,7 @@ public class Compressor {
 
     /**
      * Odkodowuje zakodowany tekst
+     *
      * @return
      */
     public String decode(BitSet textToDecode, Map<String, BitSet> lettersCode) {
@@ -154,17 +159,79 @@ public class Compressor {
         return decompressedText.toString();
     }
 
+    private BitSet changeCodeMapToBitSet(Map<String, BitSet> lettersCode) {
+        BitSet bitSet = new BitSet(lettersCode.size() * (8 + 6));
+        int globalNumber = 0;
+        for (String key : lettersCode.keySet()) {
+            BitSet letterAsBitSet = BitSet.valueOf(key.getBytes());
+            BitSet value = lettersCode.get(key);
+            for (int i = 0; i < 8; i++) {
+                if (letterAsBitSet.get(i)) {
+                    bitSet.set(globalNumber + i);
+                }
+            }
+            globalNumber += 8;
+            for (int i = 0; i < 6; i++) {
+                if (value.get(i)) {
+                    bitSet.set(globalNumber + i);
+                }
+            }
+            globalNumber += 6;
+//            System.out.printf(key + " --> ");
+//            System.out.printf(letterAsBitSet + " --> ");
+//            System.out.println(value);
+        }
+        return bitSet;
+    }
+
     /**
      * zapisuje kod oraz zakodowany tekst
      */
-    public void save() {
+    public void save(BitSet textToSave, Map<String, BitSet> lettersCode, String filename) {
+        File outCodeFile = new File("outputs/" + filename + "_code.cpd");
+        File outFile = new File("outputs/" + filename + ".cpr");
+        BitSet codeToSave = changeCodeMapToBitSet(lettersCode);
+        try {
+            // encoded textcodeToSave
+            FileOutputStream fos = new FileOutputStream(outFile);
+//            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            fos.write(textToSave.toByteArray());
+            fos.close();
 
+            // compressing code
+            FileOutputStream fosCode = new FileOutputStream(outCodeFile);
+            fosCode.write(codeToSave.toByteArray());
+            fosCode.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Wczytuje zakodowany tekst oraz kod
      */
-    public void load() {
+    public BitSet load(String filename, Map<String, BitSet> lettersCode) {
+        Path path = Paths.get("outputs/" + filename + ".cpr");
+        byte[] bytes = new byte[0];
+        try {
+            bytes = Files.readAllBytes(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BitSet bitSet = BitSet.valueOf(bytes);
 
+        int global = 0;
+        for (int x = 0; x < bitSet.length(); x++) {
+            BitSet code = new BitSet(6);
+            for (int i = 0; i < 6; i++) {
+                if (bitSet.get(global + i)) {
+                    code.set(i);
+                }
+            }
+            global += 6;
+        }
+        return bitSet;
     }
 }
