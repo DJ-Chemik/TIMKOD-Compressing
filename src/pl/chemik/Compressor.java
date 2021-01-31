@@ -9,12 +9,10 @@ public class Compressor {
     private File file;
     private List<String> fileLetters;
     private Map<String, Float> probabilities;
-    private Map<String, BitSet> lettersCode;
 
     public Compressor(String filename) {
         readInputFile(filename);
         checkProbabilities();
-        create();
     }
 
     private void displayText(List<String> wordsArray, int maxNumbers) {
@@ -89,8 +87,9 @@ public class Compressor {
 
     /**
      * Na podstawie listy częstości poszczególnych znaków tworzy kod
+     * @return
      */
-    public void create() {
+    public Map<String, BitSet> create() {
         List<Tuple> tuples = new ArrayList<>();
         for (String letter : probabilities.keySet()) {
             tuples.add(new Tuple(0, letter, probabilities.get(letter)));
@@ -105,14 +104,16 @@ public class Compressor {
         for (Tuple tuple : tuples) {
             tuple.setOrder(order++);
         }
+        Map<String, BitSet> lettersCode;
         lettersCode = generateBasicCodes(tuples);
+        return lettersCode;
     }
 
     /**
      * Tworzy zakodowaną reprezentację tekstu
      * @return
      */
-    public BitSet encode() {
+    public BitSet encode(Map<String, BitSet> lettersCode) {
         BitSet bitSet = new BitSet(6 * fileLetters.size());
         int globalBitNumber = 0;
         for (String letter : fileLetters) {
@@ -131,7 +132,7 @@ public class Compressor {
      * Odkodowuje zakodowany tekst
      * @return
      */
-    public String decode(BitSet textToDecode) {
+    public String decode(BitSet textToDecode, Map<String, BitSet> lettersCode) {
         StringBuilder decompressedText = new StringBuilder("");
         HashMap<BitSet, String> decodingCode = new HashMap<>();
         lettersCode.forEach((letter, code) -> decodingCode.put(code, letter));
