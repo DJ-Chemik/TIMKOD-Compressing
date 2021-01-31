@@ -1,18 +1,21 @@
 package pl.chemik;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class Compressor {
+public class SixBitCompressor {
 
     private File file;
     private List<String> fileLetters;
     private Map<String, Float> probabilities;
 
-    public Compressor(String filename) {
+    public SixBitCompressor(String filename) {
         readInputFile(filename);
         checkProbabilities();
     }
@@ -209,18 +212,49 @@ public class Compressor {
         }
     }
 
+    private Map<String, BitSet> decodeFileWithCode(BitSet bitSetCode) {
+        Map<String, BitSet> resultMap = new HashMap<>();
+        int global = 0;
+        for (int x = 0; x < bitSetCode.length(); x++) {
+            BitSet letterBitSet = new BitSet(8);
+            BitSet code = new BitSet(6);
+            for (int i = 0; i < 8; i++) {
+                if (bitSetCode.get(global + i)) {
+                    letterBitSet.set(i);
+                }
+            }
+            global += 8;
+            for (int i = 0; i < 6; i++) {
+                if (bitSetCode.get(global + i)) {
+                    code.set(i);
+                }
+            }
+            global += 6;
+            byte[] letterByte = letterBitSet.toByteArray();
+            if (letterByte.length > 0) {
+                String letter = String.valueOf((char) letterByte[0]);
+                resultMap.put(letter, code);
+            }
+        }
+        return resultMap;
+    }
+
     /**
      * Wczytuje zakodowany tekst oraz kod
      */
-    public BitSet load(String filename, Map<String, BitSet> lettersCode) {
+    public LoadingResult load(String filename, Map<String, BitSet> lettersCode) {
         Path path = Paths.get("outputs/" + filename + ".cpr");
+        Path pathCode = Paths.get("outputs/" + filename + "_code.cpd");
         byte[] bytes = new byte[0];
+        byte[] bytesCode = new byte[0];
         try {
             bytes = Files.readAllBytes(path);
+            bytesCode = Files.readAllBytes(pathCode);
         } catch (IOException e) {
             e.printStackTrace();
         }
         BitSet bitSet = BitSet.valueOf(bytes);
+
 
         int global = 0;
         for (int x = 0; x < bitSet.length(); x++) {
@@ -232,6 +266,10 @@ public class Compressor {
             }
             global += 6;
         }
-        return bitSet;
+
+        BitSet bitSetCode = BitSet.valueOf(bytesCode);
+        Map<String, BitSet> code = decodeFileWithCode(bitSetCode);
+
+        return new LoadingResult(bitSet, code);
     }
 }
