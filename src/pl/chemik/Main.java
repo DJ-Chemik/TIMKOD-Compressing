@@ -17,7 +17,7 @@ public class Main {
         BitSet encodedText = sixBitCompressor.encode(compressingCode);
         String decompressedText = sixBitCompressor.decode(encodedText, compressingCode);
         sixBitCompressor.save(encodedText, compressingCode, "test");
-        LoadingResult laodingResult = sixBitCompressor.load("test", compressingCode);
+        LoadingResult laodingResult = sixBitCompressor.load("test");
         String decodedTextFromFile = sixBitCompressor.decode(laodingResult.getCompressedText(), laodingResult.getCode());
         //        System.out.println(decompressedText);
         //        System.out.println(decodedTextFromFile);
@@ -30,13 +30,12 @@ public class Main {
         BitSet encodedText = sixBitCompressor.encode(compressingCode);
         String decompressedText = sixBitCompressor.decode(encodedText, compressingCode);
         sixBitCompressor.save(encodedText, compressingCode, "huffman");
-        LoadingResult laodingResult = sixBitCompressor.load("huffman", compressingCode);
+        LoadingResult laodingResult = sixBitCompressor.load("huffman");
         String decodedTextFromFile = sixBitCompressor.decode(laodingResult.getCompressedText(), laodingResult.getCode());
         //        System.out.println(decompressedText);
         //        System.out.println(decodedTextFromFile);
         checkIs2TextIdentical(decompressedText, decodedTextFromFile);
     }
-
 
     public static void main(String[] args) {
         useSixBitCompressor();

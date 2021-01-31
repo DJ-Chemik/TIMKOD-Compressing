@@ -242,7 +242,7 @@ public class SixBitCompressor {
     /**
      * Wczytuje zakodowany tekst oraz kod
      */
-    public LoadingResult load(String filename, Map<String, BitSet> lettersCode) {
+    public LoadingResult load(String filename) {
         Path path = Paths.get("outputs/" + filename + ".cpr");
         Path pathCode = Paths.get("outputs/" + filename + "_code.cpd");
         byte[] bytes = new byte[0];
